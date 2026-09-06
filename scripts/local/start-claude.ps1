@@ -28,7 +28,9 @@ if (-not (Test-Path "config.toml")) {
     Copy-Item "config.example.toml" "config.toml"
     $config = Get-Content "config.toml" -Raw
     $config = $config.Replace('llm_provider = "moonshot"', 'llm_provider = "claude_code"')
-    Set-Content "config.toml" $config -Encoding utf8
+    # Windows PowerShell 5.1 grava UTF-8 com BOM via Set-Content, e o parser TOML
+    # da app quebra na 1a linha por causa do BOM. Grava explicitamente sem BOM.
+    [System.IO.File]::WriteAllText((Join-Path $repoRoot "config.toml"), $config, (New-Object System.Text.UTF8Encoding($false)))
     Write-Host "config.toml criado com llm_provider=claude_code."
 }
 
